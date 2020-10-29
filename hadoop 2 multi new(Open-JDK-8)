@@ -6,6 +6,7 @@ ssh -i Downloads/file.pem ubuntu@public_dns_address
 sudo apt-get update && sudo apt-get dist-upgrade -y
 
 # Copy public key on to the DataCenter main server
+** Type this command from new terminal**
 scp -i multi.pem multi.pem ubuntu@public_dns:~/.ssh
 
 # Create a Hadoop user for accessing HDFS
@@ -13,16 +14,18 @@ sudo addgroup hadoop
 sudo adduser hduser --ingroup hadoop 
 sudo adduser hduser sudo
 sudo su hduser
-
+=================================
+***Make sure following all commands are done from hduser or user you make while creating ***
 # Create local key
 ssh-keygen
 cat id_rsa.pub >> authorized_keys
 
 # Copy the instance public key (multi.pem) to hduser's directory
-sudo su
+sudo su (for this command you have to become root user) 
+
 cp /home/ubuntu/.ssh/multi.pem /home/hduser/.ssh/
-chown hduser:hadoop /home/hduser/.ssh/multi.pem
-exit
+chown hduser:hadoop /home/hduser/.ssh/multi.pem (To change Ownership of .pem file)
+exit (make sure that you will in hduser after this command) 
 
 # Install Java 8 (Open-JDK)
 sudo apt install default-jdk -y
@@ -52,9 +55,13 @@ export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
 export PDSH_RCMD_TYPE=ssh
 # -- HADOOP ENVIRONMENT VARIABLES END -- #
 
-$ source ~/.bashrc
+$ source ~/.bashrc (To Refresh bashrc file)
+echo $PATH (To check whether your path of hadoop updated or not)
 
 ****Hadoop Enviroment****
+***For hadoop configuration***
+*All configuration of hadoop are in etc folder* 
+**For all this configuration make sure givning command while you are in hadoop/etc/hadoop folder**
 
 cd /usr/local/hadoop/etc/hadoop/
 
@@ -62,6 +69,9 @@ cd /usr/local/hadoop/etc/hadoop/
 nano hadoop-env.sh
 export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64
 export HADOOP_LOG_DIR=/var/log/hadoop
+
+cd
+
 sudo mkdir /var/log/hadoop/
 sudo chown -R hduser:hadoop /var/log/hadoop
 
@@ -73,8 +83,9 @@ net.ipv6.conf.lo.disable_ipv6 = 1
 sudo sysctl -p
 
 #Disable FireWall iptables
+(We have to disable firewall because it interfare in communicatio of hadoop daemons that NN RM SNN DN NM)
 sudo iptables -L -n
-sudo ufw status
+sudo ufw status (There is by default inactive if not then only fire following command)
 sudo ufw disable
 
 #Disabling Transparent Hugepage Compaction
@@ -106,26 +117,36 @@ sudo sysctl vm.swappiness=1
 timedatectl status
 timedatectl list-timezones
 sudo timedatectl set-timezone Asia/Kolkata
-sudo ntpq -p
+sudo ntpq -p (You can skipp this command because if you know NTP is not installed)
 sudo apt install ntp -y
-sudo nano /etc/ntp.conf
+sudo nano /etc/ntp.conf (If you want configure someting in NTP you use this command)
 
 ##Configure SSH Password less logins
-sudo su -c touch /home/hdankush/.ssh/config; echo "Host *\n StrictHostKeyChecking no\n
-UserKnownHostsFile=/dev/null" > /home/hdankush/.ssh/config
+sudo su -c touch /home/hduser/.ssh/config; echo "Host *\n StrictHostKeyChecking no\n
+UserKnownHostsFile=/dev/null" > /home/hduser/.ssh/config
 sudo service ssh restart
 
 # Configure .profile (make sure you are on NN) 
  nano .profile
- eval `ssh-agent` ssh-add /home/hduser/.ssh/abc.pem
+ eval `ssh-agent` ssh-add /home/hduser/.ssh/abc.pem (KEY NAME .PEM LIKE ankush10.pem)
 
  source .profile
+ cd .ssh
+ ls -l
+ chmod 600 .pem 
 
 
 ----------****** Create a snapshot at this point ******-----------------
 Create 4 nodes from this image
 
 #sudo nano /etc/hosts and include these lines:FQDN
+private IP private DNS name
+172.31.42.240 ip-172-31-42-240.us-east-2.compute.internal nn
+172.31.38.130 ip-172-31-38-130.us-east-2.compute.internal rm
+172.31.45.6 ip-172-31-45-6.us-east-2.compute.internal 1dn
+172.31.39.39 ip-172-31-39-39.us-east-2.compute.internal 2dn
+172.31.41.189 ip-172-31-41-189.us-east-2.compute.internal 3dn
+
 172.31.29.56 ip-172-31-29-56.ec2.internal nn
 172.31.27.96 ip-172-31-27-96.ec2.internal rm
 172.31.18.137 ip-172-31-18-137.ec2.internal 1dn
@@ -216,6 +237,7 @@ sudo chown -R hduser:hadoop $HADOOP_HOME
 #SCP all the files
 cd /usr/local/hadoop/etc/hadoop
 For all nodes
+**DO it for all the nodes like 1dn 2dn 3dn ...**
 scp core-site.xml hdfs-site.xml mapred-site.xml yarn-site.xml slaves rm:/usr/local/hadoop/etc/hadoop
 
 
