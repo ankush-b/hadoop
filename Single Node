@@ -48,9 +48,16 @@ export HADOOP_HDFS_HOME=$HADOOP_HOME
 export YARN_HOME=$HADOOP_HOME
 export HADOOP_CONF_DIR=/usr/local/hadoop/etc/hadoop
 
-source ~/.bashrc
+source ~/.bashrc (To Refresh the file)
+echo $PATH (To check your hadoop path is updated or not)
+
+***For hadoop configuration***
+*All configuration of hadoop are in etc folder* 
+**For all this configuration make sure givning command while you are in hadoop/etc/hadoop folder** 
 
 cd /usr/local/hadoop/etc/hadoop/
+
+* ls (It show you configuration files of hadoop)
 
 #Update hadoop-env.sh
 nano hadoop-env.sh
@@ -76,7 +83,13 @@ sudo chown hduser:hadoop /app/hadoop/tmp
 
 
 #Update mapred-site.xml
+In folder we have to edit mapred-site.xml but this file is not present hence we need to copy all data of mapred-site.xml.templete 
+and name is as mapred-site.xml to do this fire following command
+
 cp mapred-site.xml.template mapred-site.xml
+
+ls (To check whether your newly created file presnt or not) 
+
 nano mapred-site.xml
 <property>
   <name>mapreduce.jobtracker.address</name>
@@ -113,7 +126,9 @@ nano yarn-site.xml
       <name>yarn.nodemanager.aux-services</name>
       <value>mapreduce_shuffle</value>
    </property>
-
+   
+   Hadoop Configuration is completed now move to home folder by entering "cd "
+====================================================
 
 #Format Namenode
 hdfs namenode -format
@@ -128,8 +143,11 @@ jps
 
 
 hdfs dfs -mkdir /user
-hdfs dfs -mkdir /user/ubuntu
-hdfs dfs -put --- /user/ubuntu
+hdfs dfs -mkdir /user/hduser
+hdfs dfs -put --- /user/ubuntu (Put name after put of file which is present in home directory like 	hadoop-2.9.2.tar.gz)
+
+
+**Fire all this command from hduser or from user user make while making user** 
 
 hadoop jar /usr/local/hadoop/share/hadoop/mapreduce/hadoop-*examples*.jar pi 5 10
 
